@@ -9,8 +9,9 @@ import java.io.IOException;
 
 public class Main extends Application {
 
+    // Screen Sizes Supported
     final static int[][] SCREEN_SIZES = {
-            {1366, 768}
+            {800, 600},
     };
 
     @Override
