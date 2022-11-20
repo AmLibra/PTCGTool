@@ -3,42 +3,34 @@ package com.libra.ptcgt.ptcgtool;
 import com.libra.ptcgt.ptcgtool.api.PTCGAPI;
 import com.libra.ptcgt.ptcgtool.objects.Card;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.*;
 
 public class Controller {
 
-    private final Map<String, List<Card>> searchCache = new HashMap<>();
-    private final Map<Card, Image> imageCache = new HashMap<>();
-
+    private final static boolean BG_CACHING_ENABLED = true; // Enables background caching of all the searched results
+                                                            // in local directory
     @FXML
-    private ListView<Card> lView;
-
+    private ListView<Card> cardListView; // where the user sees and selects the found results to the query
     @FXML
-    private TextField searchField;
-
+    private TextField searchField; // user input field
     @FXML
-    private ImageView cardImage;
-
+    private Toggle toggleStandard; // filters standard only
     @FXML
-    private Button addButton;
-
+    private ImageView cardImage; // the selected card from the found results
     @FXML
-    private Button removeButton;
+    private Button addButton; // used to add the selected card from current Deck
+    @FXML
+    private Button removeButton; // used to remove the selected card from current Deck
+    @FXML
+    private Label statusDisplayLabel;
 
     @FXML
     public void initialize() {
-        System.out.println("Initializing...");
-        clearCache();
+        System.out.println("Initializing scene...");
         bindListView();
 
         //DEBUG
@@ -46,69 +38,47 @@ public class Controller {
         search();
     }
 
+    /**
+     * Called when user presses the Search button or presses enter
+     */
     @FXML
-    protected void search(){
-        lView.getItems().clear();
+    protected void search() {
+        cardListView.getItems().clear();
         String s = searchField.textProperty().get();
         searchField.textProperty().setValue("");
         List<Card> cards = fetchCardsList(s);
-        lView.getItems().addAll(cards);
-        Thread t = new Thread(() -> cards.forEach(this::fetchImage));
-        t.setPriority(Thread.MIN_PRIORITY);
+        cardListView.getItems().addAll(cards);
+        if (BG_CACHING_ENABLED)
+            runCachingProcess(cards);
+    }
+    private void runCachingProcess(List<Card> cards) {
+        System.out.println("Parallel Caching started enabled.");
+        cards.forEach(c -> new Thread(c::getImg).start());
     }
 
     /**
-     * Updates the Image from the ListView selected content
+     * Updates the current displayed Image to reflect the selected card in the list
      */
     @FXML
     protected void bindListView() {
-        lView.getSelectionModel().selectedItemProperty().addListener((observableValue, c0, c1) -> {
-            Card c = lView.getSelectionModel().getSelectedItem();
-            if (c != null) {
-                showButtons();
-                cardImage.setImage(fetchImage(c));
-            } else
-                hideButtons();
+        cardListView.getSelectionModel().selectedItemProperty().addListener((observableValue, c0, c1) -> {
+            Card card = cardListView.getSelectionModel().getSelectedItem();
+            toggleSelectedCardView(card);
         });
     }
 
     /**
-     * Hides the Add and Remove Buttons
-     */
-    private void hideButtons() {
-        addButton.setVisible(false);
-        removeButton.setVisible(false);
-    }
-
-    /**
-     * Shows the Add and Remove Buttons
-     */
-    private void showButtons() {
-        addButton.setVisible(true);
-        removeButton.setVisible(true);
-    }
-
-    /**
-     * Fetches the Image representing a Card
+     * Toggles the view of the selected card on and on when needed
      *
-     * @param c the given Card
-     * @return Image related to Card
+     * @param card the current selected card, may be null
      */
-    private Image fetchImage(Card c) {
-        if(imageCache.containsKey(c))
-            return imageCache.get(c);
-        AtomicReference<Image> img = new AtomicReference<>();
-        Thread t = new Thread(() -> img.set(c.getImg()));
-        t.setPriority(Thread.MAX_PRIORITY);
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        Image res = img.get();
-        imageCache.put(c, res);
-        return res;
+    private void toggleSelectedCardView(Card card) {
+        boolean cardIsSelected = card != null;
+        addButton.setVisible(cardIsSelected);
+        removeButton.setVisible(cardIsSelected);
+        cardImage.setVisible(cardIsSelected);
+        if(cardIsSelected)
+            cardImage.setImage(card.getImg());
     }
 
     /**
@@ -118,23 +88,13 @@ public class Controller {
      * @return a List of Cards that represent the cards featuring that Pokémon
      */
     private List<Card> fetchCardsList(String searchQuery) {
-        if(searchCache.containsKey(searchQuery))
-            return searchCache.get(searchQuery);
-
         List<Card> cardsList = new ArrayList<>();
-        Thread t = new Thread(() -> PTCGAPI.searchCardData(searchQuery).forEach(v -> cardsList.add(new Card(v))));
-        t.start();
         try {
-            t.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        searchCache.put(searchQuery, cardsList);
-        return cardsList;
-    }
+            Objects.requireNonNull(PTCGAPI.searchCardData(searchQuery))
+                    .forEach(v -> cardsList.add(new Card(v)));
+        } catch (NullPointerException e) {
 
-    private void clearCache() {
-        searchCache.clear();
-        imageCache.clear();
+        }
+        return cardsList;
     }
 }

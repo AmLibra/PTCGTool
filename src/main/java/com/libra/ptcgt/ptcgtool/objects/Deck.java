@@ -2,7 +2,7 @@ package com.libra.ptcgt.ptcgtool.objects;
 
 import java.util.List;
 
-public final class Deck {
+public final class Deck { // TODO; THIS CLASS IS A WIP
 
     private boolean legal;
     private List<Card> cards;
