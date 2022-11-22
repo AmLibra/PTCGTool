@@ -23,16 +23,16 @@ public class PTCGAPI {
     private static final String CONNECTION_SUCCESS = "Response received: 200 OK"; // Successful API response
     private static final String CONNECTION_FAIL = "Refused API call! Response Code: "; // Successful API response
 
+
     /**
      * Fetches the Json Object used to instantiate a single Card using its id
      *
-     * @param id unique ID of the card to fetch
+     * @param request the URL to address the request to
      * @return Json Object representing the Card
      */
-    public static JSONObject getCardData(String id) {
-        System.out.println("Fetching card with id: " + id);
+    private static JSONObject getJsonObject(String request) {
         try {
-            URL url = new URL(API_URL + id);
+            URL url = new URL(request);
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
             int responseCode = connection.getResponseCode();
             if (responseCode == 200)
@@ -45,6 +45,18 @@ public class PTCGAPI {
         return null;
     }
 
+
+    /**
+     * Fetches the Json Object used to instantiate a single Card using its id
+     *
+     * @param id unique ID of the card to fetch
+     * @return Json Object representing the Card
+     */
+    public static JSONObject getCardData(String id) {
+        System.out.println("Fetching card with id: " + id);
+        return getJsonObject(API_URL + id);
+    }
+
     /**
      * Fetches the List of Json Objects representing a Card each
      *
@@ -52,28 +64,16 @@ public class PTCGAPI {
      * @return all the cards whose names contain the name we looked for
      */
     public static List<JSONObject> searchCardData(String cardName) {
-        if (cardName.isEmpty()) return List.of();
         System.out.println("Fetching all cards with name: " + cardName);
-        try {
-            URL url = new URL(API_URL_SEARCH + cardName);
-            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-            int responseCode = connection.getResponseCode();
-            if (responseCode == 200)
-                return toList(parseResponse(connection));
-            else
-                System.out.println(CONNECTION_FAIL + responseCode);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        return toList(getJsonObject(API_URL_SEARCH + cardName));
     }
 
     /**
-     * Fetches all the cards currently available, useful for a full caching //TODO: Read Multiples Pages
+     * Fetches all the cards currently available, useful for a full caching
      *
      * @return the Json Object containing all cards
      */
-    public static List<JSONObject> getAllCards() {
+    public static List<JSONObject> getAllCards() { //TODO: Read Multiples Pages
         System.out.println("Fetching all cards !");
         try {
             URL url = new URL(API_BASE);
@@ -88,7 +88,6 @@ public class PTCGAPI {
         }
         return List.of();
     }
-
 
     /**
      * Used to receive and parse a Json response using an HTTPS connection
@@ -117,6 +116,7 @@ public class PTCGAPI {
      */
     private static List<JSONObject> toList(JSONObject json) {
         System.out.print("Converting to list...");
+        if(json == null) return List.of();
         List<JSONObject> list = new ArrayList<>();
         JSONArray jsonArray = (JSONArray) json.get("data");
         for (Object o : jsonArray) list.add((JSONObject) o);

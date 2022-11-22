@@ -3,6 +3,7 @@ package com.libra.ptcgt.ptcgtool;
 import com.libra.ptcgt.ptcgtool.api.PTCGAPI;
 import com.libra.ptcgt.ptcgtool.objects.Card;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -18,7 +19,7 @@ public class Controller {
     @FXML
     private TextField searchField; // user input field
     @FXML
-    private Toggle toggleStandard; // filters standard only
+    private CheckBox toggleStandard; // filters standard only
     @FXML
     private ImageView cardImage; // the selected card from the found results
     @FXML
@@ -27,6 +28,11 @@ public class Controller {
     private Button removeButton; // used to remove the selected card from current Deck
     @FXML
     private Label statusDisplayLabel;
+    @FXML
+    private TabPane tabPane;
+
+    //private Scene scene = tabPane.getScene();
+
 
     @FXML
     public void initialize() {
