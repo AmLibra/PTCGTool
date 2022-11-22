@@ -26,7 +26,7 @@
                <CheckBox fx:id="toggleStandard" mnemonicParsing="false" text="Search Only in Standard" />
                 </HBox>
                 <HBox alignment="CENTER_RIGHT" prefHeight="498.0" prefWidth="637.0" spacing="100.0">
-               <Label alignment="CENTER" style="-fx-translate-x: 200;" text="Label">
+               <Label fx:id="statusDisplayLabel" alignment="CENTER" prefHeight="53.0" prefWidth="215.0" style="-fx-translate-x: 200;" text="Loading...">
                   <font>
                      <Font size="36.0" />
                   </font>

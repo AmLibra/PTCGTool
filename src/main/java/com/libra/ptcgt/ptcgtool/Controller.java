@@ -3,12 +3,12 @@ package com.libra.ptcgt.ptcgtool;
 import com.libra.ptcgt.ptcgtool.api.PTCGAPI;
 import com.libra.ptcgt.ptcgtool.objects.Card;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class Controller {
 
@@ -58,7 +58,7 @@ public class Controller {
             runCachingProcess(cards);
     }
     private void runCachingProcess(List<Card> cards) {
-        System.out.println("Parallel Caching started enabled.");
+        System.out.println("Parallel Caching enabled.");
         cards.forEach(c -> new Thread(c::getImg).start());
     }
 
