@@ -23,7 +23,7 @@ public final class Card {
         name = data.get("name").toString();
         id = data.get("id").toString();
         JSONObject setData = (JSONObject) data.get("set");
-        setName = setData.get("ptcgoCode") == null ? "NONE" : setData.get("ptcgoCode").toString();
+        setName = setData.get("ptcgoCode") == null ? "" : setData.get("ptcgoCode").toString();
     }
 
     /**

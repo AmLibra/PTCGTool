@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<TabPane prefHeight="600.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.libra.ptcgt.ptcgtool.Controller">
+<TabPane onKeyPressed="#handleKeyPressed" prefHeight="600.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.libra.ptcgt.ptcgtool.Controller">
     <Tab text="Search Cards">
         <SplitPane dividerPositions="0.8" prefHeight="261.0" prefWidth="465.0">
             <VBox prefHeight="200.0" prefWidth="100.0">
