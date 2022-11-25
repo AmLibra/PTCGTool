@@ -1,7 +1,12 @@
 package com.libra.ptcgt.ptcgtool;
 
+import com.libra.ptcgt.ptcgtool.api.InputOutputUtils;
 import com.libra.ptcgt.ptcgtool.api.PTCGAPI;
+import com.libra.ptcgt.ptcgtool.controllers.CardSearchTabController;
+import com.libra.ptcgt.ptcgtool.controllers.DeckBuilderTabController;
 import com.libra.ptcgt.ptcgtool.objects.Card;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -13,6 +18,35 @@ import java.util.List;
 import java.util.Objects;
 
 public class Controller {
+
+    @FXML
+    private TabPane tabPane;
+    @FXML
+    private Tab cardSearchTab;
+    @FXML
+    private CardSearchTabController cardSearchTabController;
+    @FXML
+    private Tab deckBuilderTab;
+    @FXML
+    private DeckBuilderTabController deckBuilderTabController;
+
+    public void init() {
+        tabPane.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Tab> observable,
+                                                                        Tab oldValue, Tab newValue) -> {
+            if (newValue == cardSearchTab) {
+                System.out.println("- card search -");
+                System.out.println("xxx_card search_xxxController=" + cardSearchTabController); //if =null => inject problem
+                cardSearchTabController.sayHi();
+            } else if (newValue == deckBuilderTab) {
+                System.out.println("- deck builder -");
+                System.out.println("xxx_deck builder_xxxController=" + deckBuilderTabController); //if =null => inject problem
+                deckBuilderTabController.sayHi();
+            } else {
+                System.out.println("- another Tab -");
+            }
+        });
+    }
+
 
     private final static boolean BG_CACHING_ENABLED = true; // Enables background caching of all the searched results
     // in local directory
@@ -30,27 +64,30 @@ public class Controller {
     private Button removeButton; // used to remove the selected card from current Deck
     @FXML
     private Label statusDisplayLabel;
-    @FXML
-    private TabPane tabPane;
+
+    private final SimpleStringProperty status = new SimpleStringProperty();
 
     //private Scene scene = tabPane.getScene();
 
     @FXML
-    protected void handleKeyPressed(KeyEvent key){
-        KeyCode c = key.getCode();
-        System.out.println("Key Pressed: " + c);
-        if(c == KeyCode.ENTER)
-            search();
+    protected void handleKeyPressed(KeyEvent key) {
+        if (key.getCode() == KeyCode.ENTER) search();
     }
 
     @FXML
     public void initialize() {
         System.out.println("Initializing scene...");
-        bindListView();
+        cardSearchTabController = new CardSearchTabController();
+        deckBuilderTabController = new DeckBuilderTabController();
+        init();
+        if (BG_CACHING_ENABLED) System.out.println("Parallel Caching enabled.");
+        System.out.println("Cache size is " + InputOutputUtils.directorySize(CACHED_FILES_LOCATION) / 1000000 + " Mb");
 
-        //DEBUG
-        searchField.textProperty().setValue("Lugia");
-        search();
+        cardListView.getSelectionModel().
+                selectedItemProperty().addListener((o, old, newSelected) -> toggleSelectedCardView(newSelected));
+        statusDisplayLabel.textProperty().bind(status);
+
+        status.set("Welcome ! Try to look something up !");
     }
 
     /**
@@ -61,30 +98,19 @@ public class Controller {
         cardListView.getItems().clear();
         List<Card> cards = fetchCardsList(getSearchFieldValue(), toggleStandard.isSelected());
         cardListView.getItems().addAll(cards);
+        status.set("Found " + cards.size() + " cards matching your request.");
         runCachingProcess(cards);
     }
 
     private void runCachingProcess(List<Card> cards) {
-        if (!BG_CACHING_ENABLED) return;
-        System.out.println("Parallel Caching enabled.");
-        cards.forEach(c -> new Thread(c::getImg).start());
+        if (BG_CACHING_ENABLED)
+            cards.forEach(c -> new Thread(c::getImg).start());
     }
 
     private String getSearchFieldValue() {
         String s = searchField.textProperty().get();
         searchField.textProperty().setValue("");
         return s;
-    }
-
-    /**
-     * Updates the current displayed Image to reflect the selected card in the list
-     */
-    @FXML
-    protected void bindListView() {
-        cardListView.getSelectionModel().selectedItemProperty().addListener((observableValue, c0, c1) -> {
-            Card card = cardListView.getSelectionModel().getSelectedItem();
-            toggleSelectedCardView(card);
-        });
     }
 
     /**
@@ -97,6 +123,7 @@ public class Controller {
         addButton.setVisible(cardIsSelected);
         removeButton.setVisible(cardIsSelected);
         cardImage.setVisible(cardIsSelected);
+        statusDisplayLabel.setVisible(!cardIsSelected);
         if (cardIsSelected)
             cardImage.setImage(card.getImg());
     }
@@ -113,4 +140,15 @@ public class Controller {
                 .forEach(v -> cardsList.add(new Card(v)));
         return cardsList;
     }
+
+    private final static String CACHED_FILES_LOCATION = System.getProperty("user.dir") + "\\src\\main\\resources\\cache\\images";
+
+    @FXML
+    protected void clearCache() {
+        System.out.print("Clearing all images from cache...");
+        InputOutputUtils.deleteFile(CACHED_FILES_LOCATION);
+        System.out.println("Done!");
+    }
+
+
 }

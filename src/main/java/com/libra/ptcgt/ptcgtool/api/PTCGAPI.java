@@ -21,6 +21,10 @@ public class PTCGAPI {
     private static final String API_BASE = "https://api.pokemontcg.io/v2/cards"; // API call link
     private static final String API_URL = API_BASE + "/"; // add the id from the Card class to search for that Card
     private static final String API_URL_SEARCH = API_BASE + "?q=name:"; // suffix for searching with name
+    private static final String STANDARD_LEGAL_FILTER = "legalities.standard:legal";
+    private static final String ORDER_BY_DATE_FILTER = "orderBy=-set.releaseDate";
+    private static final String FILTERS_DELIMITER = "&";
+    private static final String NAME_FILTER_SEPARATOR = " ";
     private static final String CONNECTION_SUCCESS = "Response received: 200 OK"; // Successful API response
     private static final String CONNECTION_FAIL = "Refused API call! Response Code: "; // Successful API response
 
@@ -65,8 +69,9 @@ public class PTCGAPI {
      */
     public static List<JSONObject> searchCardData(String cardName, boolean standardLegal) {
         System.out.println("Fetching all cards with name: " + cardName);
-        String standardFilter = (standardLegal ? " legalities.standard:legal" : "");
-        return toList(getJsonObject(API_URL_SEARCH + cardName + standardFilter + "&orderBy=-set.releaseDate" )); //TODO: refactor
+        String standardFilter = (standardLegal ? NAME_FILTER_SEPARATOR + STANDARD_LEGAL_FILTER : "");
+        return toList(getJsonObject(API_URL_SEARCH + cardName + standardFilter +
+                FILTERS_DELIMITER + ORDER_BY_DATE_FILTER));
     }
 
     /**
@@ -121,30 +126,6 @@ public class PTCGAPI {
     }
 
 
-    /**
-     * <a href="https://stackoverflow.com/questions/10292792/getting-image-from-url-java">Stack Overflow Solution</a>
-     * This function fetches an image from a URL and downloads it to the desired destination file
-     *
-     * @param imageUrl        the URL we want to download the image from
-     * @param destinationFile the absolute Path on the disk, we can get the Project's path using System.getProperty("user.dir")
-     */
-    public static void saveImage(String imageUrl, String destinationFile) {
-        try {
-            URL url = new URL(imageUrl);
-            InputStream is = url.openStream();
-            OutputStream os = new FileOutputStream(destinationFile);
-
-            byte[] b = new byte[(int) Math.pow(2, 9)];
-            int length;
-            while ((length = is.read(b)) != -1)
-                os.write(b, 0, length);
-
-            is.close();
-            os.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     private static String API_URL_SEARCH_PAGE(int i) {
         return "?page=" + i + "1&pageSize=250";
