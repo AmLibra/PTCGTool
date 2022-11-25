@@ -1,14 +1,10 @@
 package com.libra.ptcgt.ptcgtool.objects;
 
 import com.libra.ptcgt.ptcgtool.api.InputOutputUtils;
-import com.libra.ptcgt.ptcgtool.api.PTCGAPI;
 import javafx.scene.image.Image;
 import org.json.simple.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public final class Card {
     private final JSONObject data; // Json Object used to build a Card Object for this App
@@ -18,6 +14,8 @@ public final class Card {
     private final static String CACHED_FILES_LOCATION = "\\src\\main\\resources\\cache\\images\\";
     private final static String IMAGE_FILE_EXTENSION = ".png";
     private final String imgDir;
+    private final boolean legal;
+    private final CardType cardType;
 
     /**
      * @param data Json containing all the data for a card, which we store in order to fetch data lazily as to not
@@ -42,7 +40,7 @@ public final class Card {
         if (!imgFile.isFile()) { // checks if the file exists and is not corrupted
             String imgURL = ((JSONObject) data.get("images")).get("large").toString(); //gets the higher resolution image url
             System.out.println("Image for " + this + " not found in cache. Downloading...");
-            InputOutputUtils.saveImage(imgURL,System.getProperty("user.dir") + CACHED_FILES_LOCATION,id + IMAGE_FILE_EXTENSION);
+            InputOutputUtils.saveImage(imgURL, System.getProperty("user.dir") + CACHED_FILES_LOCATION, id + IMAGE_FILE_EXTENSION);
             System.out.println(" Done fetching: " + this + "!");
         }
         return new Image(imgDir);

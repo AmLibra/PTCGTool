@@ -73,6 +73,11 @@ public class PTCGAPI {
         return toList(getJsonObject(API_URL_SEARCH + cardName + standardFilter +
                 FILTERS_DELIMITER + ORDER_BY_DATE_FILTER));
     }
+public static List<JSONObject> searchCardsOfSet(String setName) {
+    System.out.println("Fetching all cards of set: " + setName);
+    System.out.println("NOT IMPLEMENTED YET");
+    return  null;
+}
 
     /**
      * Fetches all the cards currently available, useful for a full caching
@@ -116,8 +121,8 @@ public class PTCGAPI {
      * @return a List of Json Objects representing a Card each
      */
     private static List<JSONObject> toList(JSONObject json) {
-        System.out.print("Converting to list...");
         if (json == null) return List.of();
+        System.out.print("Converting to list...");
         List<JSONObject> list = new ArrayList<>();
         JSONArray jsonArray = (JSONArray) json.get("data");
         for (Object o : jsonArray) list.add((JSONObject) o);
@@ -126,8 +131,7 @@ public class PTCGAPI {
     }
 
 
-
     private static String API_URL_SEARCH_PAGE(int i) {
-        return "?page=" + i + "1&pageSize=250";
+        return API_BASE + "?page=" + i + "&pageSize=250";
     }
 }

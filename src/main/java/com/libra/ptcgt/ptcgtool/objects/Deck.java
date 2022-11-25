@@ -4,16 +4,15 @@ import java.util.List;
 
 public final class Deck { // TODO; THIS CLASS IS A WIP
 
-    private boolean legal;
-    private List<Card> cards;
+    private final List<Card> cards;
 
-    public Deck(boolean legal, List<Card> cards) {
-        this.legal = legal;
+    public Deck(List<Card> cards) {
         this.cards = cards;
+
     }
 
     public boolean isLegal() {
-        return legal;
+        return cards.size() == 60;
     }
 
     public List<Card> getCards() {

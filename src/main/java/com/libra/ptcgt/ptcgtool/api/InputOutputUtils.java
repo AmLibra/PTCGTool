@@ -8,6 +8,7 @@ import java.util.Objects;
 
 public class InputOutputUtils {
 
+    public final static String CACHED_FILES_LOCATION = System.getProperty("user.dir") + "\\src\\main\\resources\\cache\\images";
 
     /**
      * <a href="https://stackoverflow.com/questions/10292792/getting-image-from-url-java">Stack Overflow Solution</a>
