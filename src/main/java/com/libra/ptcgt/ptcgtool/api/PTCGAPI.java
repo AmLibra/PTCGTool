@@ -6,7 +6,9 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import javax.net.ssl.HttpsURLConnection;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +20,7 @@ import java.util.stream.IntStream;
  * A very big thank you to the developers of this API:
  * <a href="https://dev.pokemontcg.io/">PokemonTCG API Link</a>
  */
-public class PTCGAPI {
+public final class PTCGAPI {
     private static final String API_BASE = "https://api.pokemontcg.io/v2/cards"; // API call link
     private static final String API_URL = API_BASE + "/"; // add the id from the Card class to search for that Card
     private static final String API_URL_SEARCH = API_BASE + "?q=name:"; // suffix for searching with name
@@ -29,6 +31,60 @@ public class PTCGAPI {
     private static final String CONNECTION_SUCCESS = "Response received: 200 OK"; // Successful API response
     private static final String CONNECTION_FAIL = "Refused API call! Response Code: "; // Successful API response
 
+
+    /**
+     * Fetches the Json Object used to instantiate a single Card using its ID
+     *
+     * @param id unique ID of the card to fetch
+     * @return Json Object representing the Card
+     */
+    public static JSONObject getCardData(String id) {
+        System.out.println("Fetching card with id: " + id);
+        return (JSONObject) Objects.requireNonNull(getJsonObject(API_URL + id)).get("data");
+    }
+
+    /**
+     * Fetches the List of Json Objects whose name contains cardName
+     *
+     * @param cardName the name of the card to look for
+     * @return all the cards whose names contain the name we looked for
+     */
+    public static List<JSONObject> searchCardData(String cardName, boolean standardLegal) {
+        System.out.println("Fetching all cards containing: " + cardName);
+        String standardFilter = (standardLegal ? NAME_FILTER_SEPARATOR + STANDARD_LEGAL_FILTER : "");
+        //  wildCard "*" symbol for a little extra lenience in search
+        return toList(getJsonObject(API_URL_SEARCH + "*" + cardName + "*" + standardFilter +
+                FILTERS_DELIMITER + ORDER_BY_DATE_FILTER));
+    }
+
+    /**
+     * Fetches all the cards currently available, useful for a full caching
+     *
+     * @return the Json Object containing all cards
+     */
+    public static List<JSONObject> getAllCards() {
+        System.out.println("Fetching all cards !");
+        List<JSONObject> accumulatorList = new ArrayList<>();
+
+        JSONObject allCardsData = Objects.requireNonNull(getJsonObject(API_BASE));
+        // read JsonObject Header
+        long totalCount = (long) allCardsData.get("totalCount");
+        int numPages = (int) Math.ceilDiv(totalCount, (long) allCardsData.get("pageSize")) + 1;
+        // Get and parse pages in parallel for i to numPages
+        IntStream.range(1, numPages)
+                .parallel().forEach(
+                        i -> accumulatorList.addAll(toList(getJsonObject(API_URL_SEARCH_PAGE(i))))
+                );
+        return accumulatorList;
+    }
+
+    /**
+     * @param i page number
+     * @return the proper URL to search for that page with number i and size 250
+     */
+    private static String API_URL_SEARCH_PAGE(int i) {
+        return API_BASE + "?page=" + i + "&pageSize=250";
+    }
 
     /**
      * Fetches the Json Object used to instantiate a single Card using its id
@@ -49,50 +105,6 @@ public class PTCGAPI {
             e.printStackTrace();
         }
         return null;
-    }
-
-    /**
-     * Fetches the Json Object used to instantiate a single Card using its id
-     *
-     * @param id unique ID of the card to fetch
-     * @return Json Object representing the Card
-     */
-    public static JSONObject getCardData(String id) {
-        System.out.println("Fetching card with id: " + id);
-    return (JSONObject) Objects.requireNonNull(getJsonObject(API_URL + id)).get("data");
-    }
-
-    /**
-     * Fetches the List of Json Objects representing a Card each
-     *
-     * @param cardName the name of the card to look for
-     * @return all the cards whose names contain the name we looked for
-     */
-    public static List<JSONObject> searchCardData(String cardName, boolean standardLegal) {
-        System.out.println("Fetching all cards containing: " + cardName);
-        String standardFilter = (standardLegal ? NAME_FILTER_SEPARATOR + STANDARD_LEGAL_FILTER : "");
-        return toList(getJsonObject(API_URL_SEARCH + "*" + cardName + "*" + standardFilter +
-                FILTERS_DELIMITER + ORDER_BY_DATE_FILTER));
-    }
-public static List<JSONObject> searchCardsOfSet(String setName) {
-    System.out.println("Fetching all cards of set: " + setName);
-    System.out.println("NOT IMPLEMENTED YET");
-    return  null;
-}
-
-    /**
-     * Fetches all the cards currently available, useful for a full caching
-     *
-     * @return the Json Object containing all cards
-     */
-    public static List<JSONObject> getAllCards() { // TODO: TEST THIS WORKS
-        System.out.println("Fetching all cards !");
-        List<JSONObject> accumulatorList = new ArrayList<>();
-        JSONObject allCardsData = Objects.requireNonNull(getJsonObject(API_BASE));
-        long totalCount = (long) allCardsData.get("totalCount");
-        int numPages = (int) Math.ceilDiv(totalCount, (long) allCardsData.get("pageSize")) + 1;
-        IntStream.range(1, numPages).parallel().forEach( i -> accumulatorList.addAll(toList(getJsonObject(API_URL_SEARCH_PAGE(i)))));
-        return accumulatorList;
     }
 
     /**
@@ -128,10 +140,5 @@ public static List<JSONObject> searchCardsOfSet(String setName) {
         for (Object o : jsonArray) list.add((JSONObject) o);
         System.out.println(" Done! Found " + list.size() + " cards");
         return list;
-    }
-
-
-    private static String API_URL_SEARCH_PAGE(int i) {
-        return API_BASE + "?page=" + i + "&pageSize=250";
     }
 }

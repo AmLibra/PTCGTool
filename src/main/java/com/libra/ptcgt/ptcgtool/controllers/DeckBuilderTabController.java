@@ -1,6 +1,6 @@
 package com.libra.ptcgt.ptcgtool.controllers;
 
-import com.libra.ptcgt.ptcgtool.api.InputOutputUtils;
+import com.libra.ptcgt.ptcgtool.api.IOTools;
 import com.libra.ptcgt.ptcgtool.objects.Card;
 import com.libra.ptcgt.ptcgtool.objects.Deck;
 import javafx.beans.property.SimpleStringProperty;
@@ -37,7 +37,7 @@ public class DeckBuilderTabController {
     @FXML
     public void initialize() {
         System.out.print("Deck builder initializing...");
-        existingDecks.getItems().addAll(InputOutputUtils.readDeckFolder());
+        existingDecks.getItems().addAll(IOTools.readDeckFolder());
         currentDeckLabel.textProperty().bind(currentDeckName);
         pokemon.getSelectionModel().
                 selectedItemProperty().addListener((o, old, newSelected) -> toggleSelectedCardView(newSelected));
@@ -55,7 +55,7 @@ public class DeckBuilderTabController {
         String selectedDeck = existingDecks.getValue();
         if (selectedDeck != null) {
             currentDeckName.set(selectedDeck);
-            currentDeck = InputOutputUtils.readDeckFromDisk(selectedDeck);
+            currentDeck = IOTools.readDeckFromDisk(selectedDeck);
             updateCardsView();
         }
     }
@@ -63,7 +63,7 @@ public class DeckBuilderTabController {
     @FXML
     protected void saveDeck() {
         if (currentDeck != null)
-            InputOutputUtils.writeNewDeck(getSavingDeckName(), currentDeck);
+            IOTools.saveDeckToDisk(getSavingDeckName(), currentDeck);
         updateDecksListView();
     }
 
@@ -107,7 +107,7 @@ public class DeckBuilderTabController {
 
     private void updateDecksListView() {
         existingDecks.getItems().clear();
-        existingDecks.getItems().addAll(InputOutputUtils.readDeckFolder());
+        existingDecks.getItems().addAll(IOTools.readDeckFolder());
     }
 
     @FXML

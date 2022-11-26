@@ -10,14 +10,15 @@ import java.io.IOException;
 
 /**
  * @author Khalil "AmLibra" M'hirsi
+ * <a href="https://www.deviantart.com/jedflah/art/Minimalist-Lugia-Icon-Free-to-use-628411831">Lugia icon</a>
  * For fxml loading for each tab:
- * <a href="https://stackoverflow.com/questions/39164050/javafx-8-tabpanes-and-tabs-with-separate-fxml-and-controllers-for-each-tab">...</a>
+ * <a href="https://stackoverflow.com/questions/39164050/javafx-8-tabpanes-and-tabs-with-separate-fxml-and-controllers-for-each-tab">StackOverflow</a>
  * The entry point of the application, simply loading the fxml sheet and starting the JavaFx Scene
  */
 public class App extends Application {
     private final static String APP_NAME = "PTCGTool";
     private final static String APP_ICON_LOCATION = "\\src\\main\\resources\\images\\lugia-icon.png";
-    //https://www.deviantart.com/jedflah/art/Minimalist-Lugia-Icon-Free-to-use-628411831
+
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("appLayout.fxml"));

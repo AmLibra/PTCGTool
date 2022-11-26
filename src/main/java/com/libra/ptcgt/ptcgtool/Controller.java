@@ -9,7 +9,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
 public class Controller {
-
     @FXML
     private TabPane tabPane;
     @FXML
@@ -28,7 +27,6 @@ public class Controller {
 
     @FXML
     public void initialize() {
-        System.out.println("Initializing scene...");
         _deckBuilderTabController.linkToCardSearch(_cardSearchTabController);
         _cardSearchTabController.linkToDeckBuilder(_deckBuilderTabController);
     }

@@ -12,10 +12,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
-public class InputOutputUtils {
+/**
+ * A utility class containing functions used to read and write from the disk, and help to implement caching of files
+ */
+public final class IOTools {
 
     public final static String CACHED_FILES_LOCATION = System.getProperty("user.dir") + "\\src\\main\\resources\\cache\\images";
     public final static String DECKS_LOCATION = System.getProperty("user.dir") + "\\src\\main\\resources\\decks\\";
+
+    private final static String DECK_FILE_EXTENSION = ".deck";
 
     /**
      * <a href="https://stackoverflow.com/questions/10292792/getting-image-from-url-java">Stack Overflow Solution</a>
@@ -51,9 +56,9 @@ public class InputOutputUtils {
     }
 
     /**
-     * <a href="https://stackoverflow.com/questions/27599965/java-better-way-to-delete-file-if-exists">...</a>
+     * <a href="https://stackoverflow.com/questions/27599965/java-better-way-to-delete-file-if-exists">StackOverflow</a>
      *
-     * @param path
+     * @param path of file or folder we want to delete
      */
     public static void deleteFromDisk(String path) {
         if (path == null) return;
@@ -68,6 +73,12 @@ public class InputOutputUtils {
         }
     }
 
+    /**
+     * Computes the size of the given directory in bytes
+     *
+     * @param path of directory that we want to compute the size of
+     * @return size in bytes
+     */
     public static long directorySize(String path) {
         File file = new File(path);
         long acc = 0;
@@ -82,69 +93,94 @@ public class InputOutputUtils {
         return acc;
     }
 
+    /**
+     * Looks up the names of the decks saved on the current disk
+     *
+     * @return a List of names of the decks, without the .deck file extension
+     */
     public static List<String> readDeckFolder() {
         List<String> deckNames = new ArrayList<>();
         File folder = new File(DECKS_LOCATION);
         if (folder.isDirectory())
             for (File f : Objects.requireNonNull(folder.listFiles()))
-                deckNames.add(removeSuffix(f.getName(), ".deck"));
+                deckNames.add(removeExtension(f.getName()).replace("_", " "));
         return deckNames;
     }
 
     /**
-     * <a href="https://www.techiedelight.com/how-to-remove-a-suffix-from-a-string-in-java/">...</a>
+     * <a href="https://www.techiedelight.com/how-to-remove-a-suffix-from-a-string-in-java/">Remove the suffix of a string</a>
      */
-    private static String removeSuffix(final String s, final String suffix) {
-        if (s != null && suffix != null && s.endsWith(suffix))
-            return s.substring(0, s.length() - suffix.length());
-        return s;
+    private static String removeExtension(String s) {
+        return s != null && s.endsWith(DECK_FILE_EXTENSION) ?
+                s.substring(0, s.length() - DECK_FILE_EXTENSION.length()) : s;
     }
 
-    public static void writeNewDeck(String name, Deck deck) {
-        String path = DECKS_LOCATION + name + ".deck";
+    /**
+     * Used to write a Deck to the disk, generating a file with the .deck extension that we can read later
+     *
+     * @param name the name of the Deck and therefore the file. i.e. for "Lugia Vstar",
+     *             the file will be called "Lugia_Vstar.deck"
+     * @param deck the deck containing the cards we want to save
+     */
+    public static void saveDeckToDisk(String name, Deck deck) {
+        String path = DECKS_LOCATION + name.replace(" ", "_") + DECK_FILE_EXTENSION;
+        File deckFile = new File(path);
         try {
-            File deckFile = new File(path);
             System.out.println(
-                    deckFile.createNewFile() ? "File created: " + deckFile.getName() : "File already exists."
+                    deckFile.createNewFile() ?
+                            "File created: " + deckFile.getName() : "File already exists. Overwriting..."
             );
+            // write the deck to disk
             FileWriter writer = new FileWriter(path);
             writer.write(deck.toString());
             writer.close();
         } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
+            System.out.println("Could not create a new Deck.");
         }
     }
 
+    /**
+     * Used to read a Deck from the disk
+     *
+     * @param name the name of the deck we want to read
+     * @return the Deck we read
+     */
     public static Deck readDeckFromDisk(String name) {
-        String path = DECKS_LOCATION + name + ".deck";
-        File deckFile = new File(path);
+        File deckFile = new File(DECKS_LOCATION + name + DECK_FILE_EXTENSION);
         List<Card> cards = new ArrayList<>();
+        List<String> lines = new ArrayList<>();
+
         try {
             Scanner reader = new Scanner(deckFile);
-            List<String> lines = new ArrayList<>();
             while (reader.hasNextLine())
                 lines.add(reader.nextLine());
             reader.close();
-
-            lines.parallelStream().filter(line -> line.contains("\t- ")).forEach(
-                    line -> cards.addAll(parseCard(line)));
-
         } catch (FileNotFoundException e) {
-            System.out.println("File " + path + " was not found.");
+            System.out.println("File was not found.");
         }
+
+        lines.parallelStream()
+                .filter(line -> line.contains("\t- "))
+                .forEach(line -> cards.addAll(parseDeckLine(line)));
+
         return new Deck(cards);
     }
 
-    private static List<Card> parseCard(String line) {
+    /**
+     * @param deckLine a line of the deck that contains Cards to parse
+     * @return a List of the cards that were parse, in case count is > 1
+     */
+    private static List<Card> parseDeckLine(String deckLine) {
         List<Card> cards = new ArrayList<>();
-        String[] splitLine = line.split(" ");
+        String[] splitLine = deckLine.split(" ");
 
+        // The count of the card is the first piece of data after the card prefix
         int count = Integer.parseInt(splitLine[1]);
+        // the card ID is the last piece of data after the card name
         String cardId = splitLine[splitLine.length - 1];
+
         Card c = new Card(PTCGAPI.getCardData(cardId));
-        for (int i = 0; i < count; ++i)
-            cards.add(c);
+        for (int i = 0; i < count; ++i) cards.add(c);
         return cards;
     }
 

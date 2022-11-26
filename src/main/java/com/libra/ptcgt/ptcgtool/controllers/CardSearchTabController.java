@@ -1,6 +1,6 @@
 package com.libra.ptcgt.ptcgtool.controllers;
 
-import com.libra.ptcgt.ptcgtool.api.InputOutputUtils;
+import com.libra.ptcgt.ptcgtool.api.IOTools;
 import com.libra.ptcgt.ptcgtool.api.PTCGAPI;
 import com.libra.ptcgt.ptcgtool.objects.Card;
 import com.libra.ptcgt.ptcgtool.objects.Deck;
@@ -111,13 +111,13 @@ public class CardSearchTabController {
     @FXML
     protected void clearCache() {
         System.out.print("Clearing all images from cache...");
-        InputOutputUtils.deleteFromDisk(InputOutputUtils.CACHED_FILES_LOCATION);
+        IOTools.deleteFromDisk(IOTools.CACHED_FILES_LOCATION);
         cacheSize.set(cacheSizeToString());
         System.out.println("Done!");
     }
 
     private String cacheSizeToString() {
-        return "Cache size is " + InputOutputUtils.directorySize(InputOutputUtils.CACHED_FILES_LOCATION) / 1000000 + " Mb";
+        return "Cache size is " + IOTools.directorySize(IOTools.CACHED_FILES_LOCATION) / 1000000 + " Mb";
     }
 
     @FXML

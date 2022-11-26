@@ -1,36 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
-
-<AnchorPane xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.libra.ptcgt.ptcgtool.controllers.DeckBuilderTabController">
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<AnchorPane xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.libra.ptcgt.ptcgtool.controllers.DeckBuilderTabController">
     <SplitPane dividerPositions="0.8" orientation="VERTICAL" prefHeight="572.0" prefWidth="800.0">
         <SplitPane dividerPositions="0.29797979797979796" prefHeight="160.0" prefWidth="200.0">
             <VBox>
-            <Label prefHeight="17.0" prefWidth="237.0" text="Pokémon" />
-                <ListView fx:id="pokemon" />
-            <Label text="Trainer" />
-                <ListView fx:id="trainer" />
-            <Label text="Energy" />
-                <ListView fx:id="energy" />
+                <Label prefHeight="17.0" prefWidth="237.0" text="Pokémon"/>
+                <ListView fx:id="pokemon"/>
+                <Label text="Trainer"/>
+                <ListView fx:id="trainer"/>
+                <Label text="Energy"/>
+                <ListView fx:id="energy"/>
             </VBox>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-                <ImageView fx:id="cardImage" fitHeight="397.0" fitWidth="287.0" layoutX="117.0" layoutY="39.0" pickOnBounds="true" preserveRatio="true" />
-                <Button fx:id="removeButton" layoutX="442.0" layoutY="165.0" mnemonicParsing="false" onAction="#removeFromDeck" text="Remove" />
-                <Button fx:id="addButton" layoutX="453.0" layoutY="121.0" mnemonicParsing="false" onAction="#addToDeck" text="Add" />
-            <ToggleButton layoutX="433.0" layoutY="238.0" mnemonicParsing="false" text="Good starter" />
-            <ToggleButton layoutX="438.0" layoutY="271.0" mnemonicParsing="false" text="Bad starter" />
+                <ImageView fx:id="cardImage" fitHeight="397.0" fitWidth="287.0" layoutX="117.0" layoutY="39.0"
+                           pickOnBounds="true" preserveRatio="true"/>
+                <Button fx:id="removeButton" layoutX="442.0" layoutY="165.0" mnemonicParsing="false"
+                        onAction="#removeFromDeck" text="Remove"/>
+                <Button fx:id="addButton" layoutX="453.0" layoutY="121.0" mnemonicParsing="false" onAction="#addToDeck"
+                        text="Add"/>
+                <ToggleButton layoutX="433.0" layoutY="238.0" mnemonicParsing="false" text="Good starter"/>
+                <ToggleButton layoutX="438.0" layoutY="271.0" mnemonicParsing="false" text="Bad starter"/>
             </AnchorPane>
         </SplitPane>
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-         <children>
-            <Button layoutX="244.0" layoutY="14.0" mnemonicParsing="false" onAction="#saveDeck" text="Save Deck" />
-            <TextField fx:id="deckSavingNameField" layoutX="83.0" layoutY="14.0" />
-            <Label layoutX="14.0" layoutY="18.0" text="Deck Name" />
-            <ChoiceBox fx:id="existingDecks" layoutX="569.0" layoutY="14.0" prefWidth="150.0" />
-            <Button layoutX="732.0" layoutY="14.0" mnemonicParsing="false" onAction="#loadDeck" text="Load" />
-            <Label fx:id="currentDeckLabel" layoutX="399.0" layoutY="18.0" text="currentDeck" />
-         </children></AnchorPane>
+            <Button layoutX="244.0" layoutY="14.0" mnemonicParsing="false" onAction="#saveDeck" text="Save Deck"/>
+            <TextField fx:id="deckSavingNameField" layoutX="83.0" layoutY="14.0"/>
+            <Label layoutX="14.0" layoutY="18.0" text="Deck Name"/>
+            <ChoiceBox fx:id="existingDecks" layoutX="569.0" layoutY="14.0" prefWidth="150.0"/>
+            <Button layoutX="732.0" layoutY="14.0" mnemonicParsing="false" onAction="#loadDeck" text="Load"/>
+            <Label fx:id="currentDeckLabel" layoutX="399.0" layoutY="18.0" text="currentDeck"/>
+        </AnchorPane>
     </SplitPane>
 </AnchorPane>

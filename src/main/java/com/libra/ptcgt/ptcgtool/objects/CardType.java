@@ -1,12 +1,18 @@
 package com.libra.ptcgt.ptcgtool.objects;
 
-import java.io.IOException;
-
+/**
+ * Used to represent the type of Card
+ */
 public enum CardType {
     TRAINER,
     POKEMON,
     ENERGY;
 
+    /**
+     * Parses the Json String and finds the corresponding type
+     * @param cardSuperType
+     * @return
+     */
     public static CardType of(String cardSuperType) {
         return switch (cardSuperType) {
             case "Pokémon" -> POKEMON;
