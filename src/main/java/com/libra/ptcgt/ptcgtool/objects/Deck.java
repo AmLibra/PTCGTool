@@ -28,7 +28,6 @@ public final class Deck {
                 count.put(c, 1);
         });
     }
-
     public boolean isLegal() {
         return cards.size() == 60 && cards.parallelStream().allMatch(Card::isLegal) && pokemon.size() >= 1;
     }

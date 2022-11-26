@@ -59,7 +59,7 @@ public class PTCGAPI {
      */
     public static JSONObject getCardData(String id) {
         System.out.println("Fetching card with id: " + id);
-        return getJsonObject(API_URL + id);
+    return (JSONObject) Objects.requireNonNull(getJsonObject(API_URL + id)).get("data");
     }
 
     /**

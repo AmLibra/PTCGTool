@@ -23,7 +23,7 @@ public class Controller {
 
     @FXML
     protected void handleKeyPressed(KeyEvent key) {
-        if (key.getCode() == KeyCode.ENTER) _cardSearchTabController.search();
+        if (key.getCode() == KeyCode.ENTER && cardSearchTab.isSelected()) _cardSearchTabController.search();
     }
 
     @FXML

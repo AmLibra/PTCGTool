@@ -36,7 +36,7 @@ public class CardSearchTabController {
     @FXML
     private Label cacheSizeLabel;
 
-    protected Card selectedCard;
+    private Card selectedCard;
 
     private final SimpleStringProperty cacheSize = new SimpleStringProperty();
     private final SimpleStringProperty status = new SimpleStringProperty();
@@ -73,7 +73,7 @@ public class CardSearchTabController {
     }
 
     private String getSearchFieldValue() {
-        String s = searchField.textProperty().get();
+        String s = searchField.textProperty().get().strip();
         searchField.textProperty().setValue("");
         return s;
     }
@@ -141,6 +141,7 @@ public class CardSearchTabController {
         Deck current = deckBuilderTabController.currentDeck;
         if (current != null)
             deckBuilderTabController.currentDeck = current.withCard(selectedCard);
+        deckBuilderTabController.updateCardsView();
     }
 
     @FXML
@@ -148,5 +149,6 @@ public class CardSearchTabController {
         Deck current = deckBuilderTabController.currentDeck;
         if (current != null)
             deckBuilderTabController.currentDeck = current.withoutCard(selectedCard);
+        deckBuilderTabController.updateCardsView();
     }
 }

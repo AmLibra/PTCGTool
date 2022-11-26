@@ -7,7 +7,10 @@ import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Scanner;
 
 public class InputOutputUtils {
 
@@ -89,13 +92,9 @@ public class InputOutputUtils {
     }
 
     /**
-     * https://www.techiedelight.com/how-to-remove-a-suffix-from-a-string-in-java/
-     *
-     * @param s
-     * @param suffix
-     * @return
+     * <a href="https://www.techiedelight.com/how-to-remove-a-suffix-from-a-string-in-java/">...</a>
      */
-    public static String removeSuffix(final String s, final String suffix) {
+    private static String removeSuffix(final String s, final String suffix) {
         if (s != null && suffix != null && s.endsWith(suffix))
             return s.substring(0, s.length() - suffix.length());
         return s;
@@ -123,28 +122,29 @@ public class InputOutputUtils {
         List<Card> cards = new ArrayList<>();
         try {
             Scanner reader = new Scanner(deckFile);
-            while (reader.hasNextLine()) {
-                String line = reader.nextLine();
-                System.out.println(line);
-                if(line.contains("\t- "))
-                    cards.addAll(parseCard(line));
-            }
+            List<String> lines = new ArrayList<>();
+            while (reader.hasNextLine())
+                lines.add(reader.nextLine());
             reader.close();
+
+            lines.parallelStream().filter(line -> line.contains("\t- ")).forEach(
+                    line -> cards.addAll(parseCard(line)));
+
         } catch (FileNotFoundException e) {
             System.out.println("File " + path + " was not found.");
         }
-
         return new Deck(cards);
     }
 
     private static List<Card> parseCard(String line) {
         List<Card> cards = new ArrayList<>();
         String[] splitLine = line.split(" ");
-        System.out.println(Arrays.toString(splitLine));
+
         int count = Integer.parseInt(splitLine[1]);
         String cardId = splitLine[splitLine.length - 1];
-        for(int i = 0; i < count; ++i)
-            cards.add(new Card(PTCGAPI.getCardData(cardId)));
+        Card c = new Card(PTCGAPI.getCardData(cardId));
+        for (int i = 0; i < count; ++i)
+            cards.add(c);
         return cards;
     }
 
