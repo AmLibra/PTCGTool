@@ -11,6 +11,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 /**
  * This Class implements all the API calls used for getting the data needed for the functionalities of this app
@@ -68,9 +69,9 @@ public class PTCGAPI {
      * @return all the cards whose names contain the name we looked for
      */
     public static List<JSONObject> searchCardData(String cardName, boolean standardLegal) {
-        System.out.println("Fetching all cards with name: " + cardName);
+        System.out.println("Fetching all cards containing: " + cardName);
         String standardFilter = (standardLegal ? NAME_FILTER_SEPARATOR + STANDARD_LEGAL_FILTER : "");
-        return toList(getJsonObject(API_URL_SEARCH + cardName + standardFilter +
+        return toList(getJsonObject(API_URL_SEARCH + "*" + cardName + "*" + standardFilter +
                 FILTERS_DELIMITER + ORDER_BY_DATE_FILTER));
     }
 public static List<JSONObject> searchCardsOfSet(String setName) {
@@ -88,10 +89,9 @@ public static List<JSONObject> searchCardsOfSet(String setName) {
         System.out.println("Fetching all cards !");
         List<JSONObject> accumulatorList = new ArrayList<>();
         JSONObject allCardsData = Objects.requireNonNull(getJsonObject(API_BASE));
-        int totalCount = (int) allCardsData.get("totalCount");
-        int numPages = Math.ceilDiv(totalCount, (int) allCardsData.get("pageSize")) + 1;
-        for (int i = 1; i < numPages; ++i)
-            accumulatorList.addAll(toList(getJsonObject(API_URL_SEARCH_PAGE(i))));
+        long totalCount = (long) allCardsData.get("totalCount");
+        int numPages = (int) Math.ceilDiv(totalCount, (long) allCardsData.get("pageSize")) + 1;
+        IntStream.range(1, numPages).parallel().forEach( i -> accumulatorList.addAll(toList(getJsonObject(API_URL_SEARCH_PAGE(i)))));
         return accumulatorList;
     }
 

@@ -3,11 +3,10 @@ package com.libra.ptcgt.ptcgtool.controllers;
 import com.libra.ptcgt.ptcgtool.api.InputOutputUtils;
 import com.libra.ptcgt.ptcgtool.api.PTCGAPI;
 import com.libra.ptcgt.ptcgtool.objects.Card;
+import com.libra.ptcgt.ptcgtool.objects.Deck;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 import java.util.ArrayList;
@@ -15,6 +14,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class CardSearchTabController {
+
+    private DeckBuilderTabController deckBuilderTabController;
     private final static boolean BG_CACHING_ENABLED = true; // Enables background caching of all the searched results
     // in local directory
     @FXML
@@ -29,11 +30,13 @@ public class CardSearchTabController {
     private Button addButton; // used to add the selected card from current Deck
     @FXML
     private Button removeButton; // used to remove the selected card from current Deck
-    @FXML
-    private Label statusDisplayLabel;
 
     @FXML
+    private Label statusDisplayLabel;
+    @FXML
     private Label cacheSizeLabel;
+
+    protected Card selectedCard;
 
     private final SimpleStringProperty cacheSize = new SimpleStringProperty();
     private final SimpleStringProperty status = new SimpleStringProperty();
@@ -82,6 +85,7 @@ public class CardSearchTabController {
      */
     private void toggleSelectedCardView(Card card) {
         boolean cardIsSelected = card != null;
+        selectedCard = card;
         addButton.setVisible(cardIsSelected);
         removeButton.setVisible(cardIsSelected);
         cardImage.setVisible(cardIsSelected);
@@ -107,11 +111,42 @@ public class CardSearchTabController {
     @FXML
     protected void clearCache() {
         System.out.print("Clearing all images from cache...");
-        InputOutputUtils.deleteFile(InputOutputUtils.CACHED_FILES_LOCATION);
+        InputOutputUtils.deleteFromDisk(InputOutputUtils.CACHED_FILES_LOCATION);
         cacheSize.set(cacheSizeToString());
         System.out.println("Done!");
     }
+
     private String cacheSizeToString() {
         return "Cache size is " + InputOutputUtils.directorySize(InputOutputUtils.CACHED_FILES_LOCATION) / 1000000 + " Mb";
+    }
+
+    @FXML
+    protected void cacheEveryCard() {
+        Thread t =
+                new Thread(() -> {
+                    List<Card> cardsList = new ArrayList<>();
+                    PTCGAPI.getAllCards().forEach(v -> cardsList.add(new Card(v)));
+                    runCachingProcess(cardsList);
+                });
+        t.setPriority(Thread.MIN_PRIORITY);
+        t.start();
+    }
+
+    public void linkToDeckBuilder(DeckBuilderTabController deckBuilderTabController) {
+        this.deckBuilderTabController = deckBuilderTabController;
+    }
+
+    @FXML
+    protected void addToDeck() {
+        Deck current = deckBuilderTabController.currentDeck;
+        if (current != null)
+            deckBuilderTabController.currentDeck = current.withCard(selectedCard);
+    }
+
+    @FXML
+    protected void removeFromDeck() {
+        Deck current = deckBuilderTabController.currentDeck;
+        if (current != null)
+            deckBuilderTabController.currentDeck = current.withoutCard(selectedCard);
     }
 }

@@ -29,5 +29,7 @@ public class Controller {
     @FXML
     public void initialize() {
         System.out.println("Initializing scene...");
+        _deckBuilderTabController.linkToCardSearch(_cardSearchTabController);
+        _cardSearchTabController.linkToDeckBuilder(_deckBuilderTabController);
     }
 }

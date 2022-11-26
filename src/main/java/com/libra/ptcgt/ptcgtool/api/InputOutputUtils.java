@@ -1,14 +1,18 @@
 package com.libra.ptcgt.ptcgtool.api;
 
+import com.libra.ptcgt.ptcgtool.objects.Card;
+import com.libra.ptcgt.ptcgtool.objects.Deck;
+
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
+import java.util.*;
 
 public class InputOutputUtils {
 
     public final static String CACHED_FILES_LOCATION = System.getProperty("user.dir") + "\\src\\main\\resources\\cache\\images";
+    public final static String DECKS_LOCATION = System.getProperty("user.dir") + "\\src\\main\\resources\\decks\\";
 
     /**
      * <a href="https://stackoverflow.com/questions/10292792/getting-image-from-url-java">Stack Overflow Solution</a>
@@ -36,10 +40,10 @@ public class InputOutputUtils {
                 Files.createDirectories(Path.of(destinationPath));
                 saveImage(imageUrl, destinationPath, destinationFileName);
             } catch (IOException ex) {
-                throw new RuntimeException(ex);
+                System.out.println("Image not Found");
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Image not Found");
         }
     }
 
@@ -48,12 +52,12 @@ public class InputOutputUtils {
      *
      * @param path
      */
-    public static void deleteFile(String path) {
+    public static void deleteFromDisk(String path) {
         if (path == null) return;
         File file = new File(path);
         if (file.isDirectory())
             for (File f : Objects.requireNonNull(file.listFiles()))
-                deleteFile(f.toString());
+                deleteFromDisk(f.toString());
         try {
             Files.deleteIfExists(file.toPath());
         } catch (IOException e) {
@@ -65,7 +69,6 @@ public class InputOutputUtils {
         File file = new File(path);
         long acc = 0;
         if (file.isDirectory()) {
-            System.out.println("Is Direc");
             try {
                 for (File f : Objects.requireNonNull(file.listFiles()))
                     acc += Files.size(f.toPath());
@@ -74,6 +77,75 @@ public class InputOutputUtils {
             }
         }
         return acc;
+    }
+
+    public static List<String> readDeckFolder() {
+        List<String> deckNames = new ArrayList<>();
+        File folder = new File(DECKS_LOCATION);
+        if (folder.isDirectory())
+            for (File f : Objects.requireNonNull(folder.listFiles()))
+                deckNames.add(removeSuffix(f.getName(), ".deck"));
+        return deckNames;
+    }
+
+    /**
+     * https://www.techiedelight.com/how-to-remove-a-suffix-from-a-string-in-java/
+     *
+     * @param s
+     * @param suffix
+     * @return
+     */
+    public static String removeSuffix(final String s, final String suffix) {
+        if (s != null && suffix != null && s.endsWith(suffix))
+            return s.substring(0, s.length() - suffix.length());
+        return s;
+    }
+
+    public static void writeNewDeck(String name, Deck deck) {
+        String path = DECKS_LOCATION + name + ".deck";
+        try {
+            File deckFile = new File(path);
+            System.out.println(
+                    deckFile.createNewFile() ? "File created: " + deckFile.getName() : "File already exists."
+            );
+            FileWriter writer = new FileWriter(path);
+            writer.write(deck.toString());
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
+    public static Deck readDeckFromDisk(String name) {
+        String path = DECKS_LOCATION + name + ".deck";
+        File deckFile = new File(path);
+        List<Card> cards = new ArrayList<>();
+        try {
+            Scanner reader = new Scanner(deckFile);
+            while (reader.hasNextLine()) {
+                String line = reader.nextLine();
+                System.out.println(line);
+                if(line.contains("\t- "))
+                    cards.addAll(parseCard(line));
+            }
+            reader.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("File " + path + " was not found.");
+        }
+
+        return new Deck(cards);
+    }
+
+    private static List<Card> parseCard(String line) {
+        List<Card> cards = new ArrayList<>();
+        String[] splitLine = line.split(" ");
+        System.out.println(Arrays.toString(splitLine));
+        int count = Integer.parseInt(splitLine[1]);
+        String cardId = splitLine[splitLine.length - 1];
+        for(int i = 0; i < count; ++i)
+            cards.add(new Card(PTCGAPI.getCardData(cardId)));
+        return cards;
     }
 
 }

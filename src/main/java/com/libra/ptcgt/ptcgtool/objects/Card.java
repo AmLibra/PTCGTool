@@ -17,6 +17,8 @@ public final class Card {
     private final boolean legal;
     private final CardType cardType;
 
+    protected Card selectedCard;
+
     /**
      * @param data Json containing all the data for a card, which we store in order to fetch data lazily as to not
      *             make the process of fetching and creating a lot of cards too long
@@ -25,9 +27,13 @@ public final class Card {
         this.data = data;
         name = data.get("name").toString();
         id = data.get("id").toString();
+        cardType = CardType.of(data.get("supertype").toString());
+        JSONObject legalFieldData = (JSONObject) data.get("legalities");
+        legal = legalFieldData.get("standard") != null && legalFieldData.get("standard").equals("Legal");
         JSONObject setData = (JSONObject) data.get("set");
         setName = setData.get("ptcgoCode") == null ? "" : setData.get("ptcgoCode").toString();
         imgDir = System.getProperty("user.dir") + CACHED_FILES_LOCATION + id + IMAGE_FILE_EXTENSION;
+
     }
 
     /**
@@ -55,5 +61,17 @@ public final class Card {
     @Override
     public String toString() {
         return name + " " + setName;
+    }
+
+    public CardType getCardType() {
+        return cardType;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public boolean isLegal() {
+        return legal;
     }
 }
